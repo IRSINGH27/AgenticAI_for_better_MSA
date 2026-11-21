@@ -2,6 +2,19 @@
 
 An intelligent multiple sequence alignment pipeline that uses ESM-2 embeddings, LLM-driven decision making, and a RAG-based learning system to iteratively improve protein alignments.
 
+## Why this pipeline
+
+ESM and other protein language models are trained on residue sequences — they score *what residues are there*, not *where gaps belong*. In deep phylogeny the situation gets worse: with ancient, divergent sequences there are **a lot of gaps**, and nobody can tell which are **noise** (misalignment artifacts) and which are **signal** (true insertions/deletions — indels with real evolutionary meaning). Language-model scoring alone is blind to this distinction, and aggressive trimming deletes both noise and signal indiscriminately.
+
+This pipeline is built specifically to attack that problem:
+
+- **Gentle-only trimming** (`-gappyout` / `-automated1`; `-strict`/`-nogaps` banned) so gap/indel columns are never wiped wholesale
+- **Indels treated as signal by default** — a column is only removed when the gap evidence says it's noise, not because it's gappy
+- **ESM used selectively** (probing, post-correction, conservation cross-checks) to inform decisions *about* gaps, not to replace gap-aware metrics like Hill numbers and gap fraction
+- **A learning layer** that remembers which strategy preserved the right gaps on similar families before
+
+The goal: in gap-heavy deep phylogenies, keep the indel signal, shed the noise — and learn from every family which one is which.
+
 ## Features
 
 - **3-Tool Auto-Switch**: MAFFT ↔ MUSCLE ↔ ESM-2 alignment with intelligent switching
