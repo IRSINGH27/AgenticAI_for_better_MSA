@@ -44,6 +44,9 @@ learning_report.txt
 test_comparison_pfam_results.txt
 demo_export.zip
 
+# Personal workstation notes (local only)
+WORKSTATION_*
+
 # OS files
 .DS_Store
 Thumbs.db

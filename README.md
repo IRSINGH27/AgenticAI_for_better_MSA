@@ -160,8 +160,6 @@ AI/
 ├── trash/                       # Deprecated scripts
 ├── setup.sh                     # Linux/Mac setup script
 ├── setup.bat                    # Windows setup script
-├── WORKSTATION_REQUIREMENTS.md  # Hardware specs
-├── WORKSTATION_CONFIGURATIONS.tsv  # GPU comparison table
 ├── FlowChart.md                 # Full system flowcharts (Mermaid, 8 diagrams)
 ├── ALIGNMENT_SCORING.md         # Good/bad alignment scoring (Hill, Shannon, thresholds)
 ├── ContactPairMapping.md        # Contact-pair mapping ideas (protect contact regions from trim)

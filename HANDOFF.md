@@ -160,8 +160,6 @@ User FASTA File
 │   ├── config.py
 │   ├── state.py
 │   └── HANDOFF_FINAL.md
-├── WORKSTATION_REQUIREMENTS.md  # Hardware specs (4 tiers)
-├── WORKSTATION_CONFIGURATIONS.tsv  # 15 GPU configs comparison
 ├── FutureUpdates.md             # Implementation roadmap
 └── .gitignore                   # Excludes data/, models/, __pycache__/, *.fasta
 ```
@@ -697,7 +695,7 @@ python run_pipeline.py test.fasta -n 2
 - **Test suite:** ~30 tests passing
 - **Pfam families:** 30,007 (ready for batch processing)
 - **Batch builder:** Safe with signal handling, timeout enforcement, gzip resume sidecar
-- **Documentation:** README.md, HANDOFF.md, FutureUpdates.md, WORKSTATION_REQUIREMENTS.md, WORKSTATION_CONFIGURATIONS.tsv, FlowChart.md (Mermaid system map), ALIGNMENT_SCORING.md (scoring reference), ContactPairMapping.md (contact-pair ideas)
+- **Documentation:** README.md, HANDOFF.md, FutureUpdates.md, FlowChart.md (Mermaid system map), ALIGNMENT_SCORING.md (scoring reference), ContactPairMapping.md (contact-pair ideas)
 
 ---
 
