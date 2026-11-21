@@ -47,6 +47,9 @@ demo_export.zip
 # Personal workstation notes (local only)
 WORKSTATION_*
 
+# Personal social posts (local only)
+LINKEDIN_POST.md
+
 # OS files
 .DS_Store
 Thumbs.db
