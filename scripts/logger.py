@@ -7,7 +7,7 @@ from typing import Any
 class ExperimentLogger:
     def __init__(self):
         self.entries = []
-        self.logs_dir = "logs"
+        self.logs_dir = os.environ.get("MSA_LOGS_DIR") or "logs"
         self._ensure_logs_dir()
 
     def _ensure_logs_dir(self):

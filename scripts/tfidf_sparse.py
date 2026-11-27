@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import math
 from collections import Counter
@@ -9,7 +10,7 @@ from scipy import sparse
 
 
 SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
-KNOWLEDGE_DIR = SCRIPT_DIR.parent / "knowledge"
+KNOWLEDGE_DIR = pathlib.Path(os.environ.get("MSA_KNOWLEDGE_DIR") or (SCRIPT_DIR.parent / "knowledge"))
 INDEX_PREFIX = "tfidf_index"
 
 

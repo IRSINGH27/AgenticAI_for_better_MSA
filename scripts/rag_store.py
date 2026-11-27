@@ -5,7 +5,7 @@ from datetime import datetime
 import pathlib
 
 SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
-KNOWLEDGE_DIR = SCRIPT_DIR.parent / "knowledge"
+KNOWLEDGE_DIR = pathlib.Path(os.environ.get("MSA_KNOWLEDGE_DIR") or (SCRIPT_DIR.parent / "knowledge"))
 JSONL_GZ_FILE = "experiments.jsonl.gz"
 INDEX_SUFFIX = "tfidf_index.npz + tfidf_index_vocab.json"
 
