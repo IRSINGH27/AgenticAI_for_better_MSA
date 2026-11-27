@@ -50,6 +50,9 @@ WORKSTATION_*
 # Personal social posts (local only)
 LINKEDIN_POST.md
 
+# Benchmark (data/ auto-ignored; results are regenerable outputs)
+benchmark/results/
+
 # OS files
 .DS_Store
 Thumbs.db
