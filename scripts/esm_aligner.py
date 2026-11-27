@@ -106,50 +106,73 @@ def _star_align(sequences: List[str], residue_embs: List[torch.Tensor],
 
     center = total_scores.index(max(total_scores))
     center_embs = residue_embs[center]
-    aligned = [list(sequences[center])]
+    # Center as column lists (chars + embeddings); grows as sequences are added
+    center_cols: List[str] = list(sequences[center])
+    center_emb_cols: List[torch.Tensor] = [center_embs[k]
+                                           for k in range(center_embs.shape[0])]
+    # Each other sequence aligned against the center, tracked by column index
+    others: Dict[int, List[str]] = {}
 
     for i in range(n):
         if i == center:
             continue
 
+        # NW between current gapped center and the new sequence
+        c_str = "".join(center_cols)
+        c_emb = (torch.stack(center_emb_cols) if center_emb_cols
+                 else torch.zeros(0, residue_embs[i].shape[1]
+                                  if residue_embs[i].numel() else 1))
         a1, a2, _ = _needleman_wunsch(
-            "".join(aligned[0]), sequences[i],
-            center_embs, residue_embs[i],
-            gap_open, gap_extend
+            c_str, sequences[i], c_emb, residue_embs[i],
+            gap_open, gap_extend,
         )
-
-        new_aligned = [list(a1)]
-        gap_positions = [k for k, c in enumerate(a1) if c == "-"]
-
-        new_center_embs = torch.zeros(len(a1), center_embs.shape[1])
-        orig_idx = 0
-        for k, c in enumerate(a1):
-            if c == "-":
-                new_center_embs[k] = 0
+        # a1 contains every old center column in order, plus insertion '-'s.
+        # Merge: old column q -> same column for everyone; pure '-' -> new
+        # insertion column (everyone else gets '-').
+        new_center: List[str] = []
+        new_center_embs: List[torch.Tensor] = []
+        remap: List[Optional[int]] = []   # a1 position -> old center col (or None)
+        q = 0
+        zero_emb = torch.zeros(c_emb.shape[1] if c_emb.numel() else 0)
+        for k, ch in enumerate(a1):
+            if q < len(center_cols) and ch == center_cols[q]:
+                new_center.append(center_cols[q])
+                new_center_embs.append(center_emb_cols[q])
+                remap.append(q)
+                q += 1
+            elif ch == "-":
+                new_center.append("-")
+                new_center_embs.append(zero_emb)
+                remap.append(None)
             else:
-                if orig_idx < center_embs.shape[0]:
-                    new_center_embs[k] = center_embs[orig_idx]
-                orig_idx += 1
-        center_embs = new_center_embs
+                # traceback must preserve seq1 order; be defensive anyway
+                new_center.append(ch)
+                new_center_embs.append(zero_emb)
+                remap.append(None)
+        # Any leftover old columns (shouldn't happen) keep their place
+        while q < len(center_cols):
+            new_center.append(center_cols[q])
+            new_center_embs.append(center_emb_cols[q])
+            remap.append(q)
+            q += 1
 
-        for existing in aligned[1:]:
-            new_existing = []
-            orig_idx = 0
-            for k, c in enumerate(a1):
-                if c == "-":
-                    new_existing.append(existing[orig_idx] if orig_idx < len(existing) else "-")
-                else:
-                    new_existing.append(existing[orig_idx] if orig_idx < len(existing) else "-")
-                    orig_idx += 1
-            while orig_idx < len(existing):
-                new_existing.append(existing[orig_idx])
-                orig_idx += 1
-            new_aligned.append(new_existing)
+        # Shift every existing sequence through the same remap
+        for old_idx, cols in others.items():
+            shifted: List[str] = []
+            for r in remap:
+                shifted.append(cols[r] if r is not None and r < len(cols) else "-")
+            others[old_idx] = shifted
+        others[i] = list(a2)
 
-        new_aligned.append(list(a2))
-        aligned = new_aligned
+        center_cols = new_center
+        center_emb_cols = new_center_embs
 
-    return ["".join(col) for col in zip(*aligned)]
+    # Assemble rows in ORIGINAL sequence order (run_esm_alignment indexes by id)
+    rows_by_idx: Dict[int, List[str]] = {center: center_cols}
+    rows_by_idx.update(others)
+    length = len(center_cols)
+    return ["".join(rows_by_idx.get(i, [])[:length]).ljust(length, "-")
+            for i in range(n)]
 
 
 def run_esm_alignment(fasta_text: str, params: Optional[dict] = None) -> str:
